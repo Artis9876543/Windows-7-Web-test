@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Windows 7 Web OS</title>
+    <link rel="stylesheet" href="https://unpkg.com/7.css">
+    <style>
+        :root { --bg-color: #3a7ebf; } /* Default Blue */
+        body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; font-family: "Segoe UI", sans-serif; }
+
+        /* --- 1. BOOT ANIMATION --- */
+        #boot-screen {
+            position: fixed; inset: 0; background: black; z-index: 200000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .cube-container { display: grid; grid-template-columns: 20px 20px; gap: 5px; margin-bottom: 20px; }
+        .cube { width: 20px; height: 20px; animation: pulse 1.5s infinite; }
+        .c1 { background: #ed1c24; } .c2 { background: #3ab54a; animation-delay: 0.2s; }
+        .c3 { background: #00a1f1; animation-delay: 0.4s; } .c4 { background: #ffb900; animation-delay: 0.6s; }
+        @keyframes pulse { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+        #boot-text { color: white; font-size: 14px; letter-spacing: 2px; }
+
+        /* --- 2. LOCK SCREEN --- */
+        #lock-screen {
+            position: fixed; inset: 0; background: var(--bg-color); z-index: 150000;
+            display: none; flex-direction: column; align-items: center; justify-content: center; color: white;
+        }
+        .user-avatar { width: 100px; height: 100px; border: 3px solid white; border-radius: 8px; margin-bottom: 10px; background: url('https://img.icons8.com/color/100/000000/dog.png') center/cover; }
+        
+        /* --- 3. DESKTOP --- */
+        #desktop-environment { display: none; height: 100vh; background-color: var(--bg-color); position: relative; }
+        #desktop-icons { padding: 20px; display: flex; flex-direction: column; gap: 20px; z-index: 10; position: relative; }
+        .icon { width: 70px; text-align: center; color: white; cursor: pointer; text-shadow: 1px 1px 2px black; font-size: 11px; }
+        .icon img { width: 42px; display: block; margin: 0 auto 5px; }
+
+        /* --- 4. TASKBAR & START --- */
+        #taskbar { position: fixed; bottom: 0; width: 100%; height: 40px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); z-index: 100000; display: flex; align-items: center; }
+        #startMenu { position: fixed; bottom: 40px; left: 0; width: 380px; height: 450px; background: white; border: 1px solid #777; display: none; z-index: 100001; }
+        .menu-right { background: #dae7f5; width: 40%; height: 100%; float: right; padding: 10px; font-size: 12px; }
+
+        /* --- WINDOWS --- */
+        .window { position: absolute; z-index: 500; display: none; min-width: 300px; }
+    </style>
+</head>
+<body>
+
+    <div id="boot-screen">
+        <div class="cube-container">
+            <div class="cube c1"></div><div class="cube c2"></div>
+            <div class="cube c3"></div><div class="cube c4"></div>
+        </div>
+        <div id="boot-text">Starting Windows</div>
+    </div>
+
+    <div id="lock-screen">
+        <div class="user-avatar"></div>
+        <h2 id="username-display">Win7</h2>
+        <input type="password" id="pass-input" placeholder="Password">
+        <button onclick="unlock()">Enter</button>
+    </div>
+
+    <div id="desktop-environment">
+        <div id="desktop-icons">
+            <div class="icon" onclick="openApp('explorerWin')"><img src="https://img.icons8.com/color/48/000000/folder-invoices.png">Computer</div>
+            <div class="icon" onclick="openApp('calcWin')"><img src="https://img.icons8.com/color/48/000000/calculator.png">Calculator</div>
+            <div class="icon" onclick="openApp('controlWin')"><img src="https://img.icons8.com/color/48/000000/control-panel.png">Control Panel</div>
+        </div>
+
+        <div id="startMenu">
+            <div class="menu-right">
+                <div onclick="openApp('controlWin')" style="cursor:pointer; margin-bottom:10px;">Control Panel</div>
+                <hr>
+                <div onclick="restartSystem()" style="cursor:pointer; font-weight:bold; color:red;">Restart</div>
+            </div>
+            <div style="padding:10px;">
+                <b>Win7</b><br><br>
+                <div onclick="openApp('explorerWin')" style="cursor:pointer;">📁 Computer</div>
+            </div>
+        </div>
+
+        <div class="window" id="calcWin">
+            <div class="title-bar"><div class="title-bar-text">Calculator</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeApp('calcWin')"></button></div></div>
+            <div class="window-body">
+                <input id="calc-display" style="width:100%; text-align:right; margin-bottom:5px;" readonly value="0">
+                <button onclick="calc(5+5)">Test: 5+5</button> <span id="res"></span>
+                <p>Simple math logic added.</p>
+            </div>
+        </div>
+
+        <div class="window" id="controlWin" style="width:300px;">
+            <div class="title-bar"><div class="title-bar-text">Control Panel</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeApp('controlWin')"></button></div></div>
+            <div class="window-body">
+                <p>Change Wallpaper:</p>
+                <button onclick="setBG('#3a7ebf')">Blue</button>
+                <button onclick="setBG('#2d5a27')">Green</button>
+                <button onclick="setBG('#a12d2d')">Red</button>
+            </div>
+        </div>
+
+        <div class="window" id="explorerWin" style="width:400px;">
+            <div class="title-bar"><div class="title-bar-text">Computer</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeApp('explorerWin')"></button></div></div>
+            <div class="window-body" style="background:white; height:200px; display:flex; padding:10px;">
+                <div style="text-align:center;"><img src="https://img.icons8.com/color/48/000000/hard-drive.png"><br>Local Disk (C:)</div>
+            </div>
+        </div>
+
+        <div id="taskbar">
+            <img id="startOrb" src="https://img.icons8.com/color/48/000000/windows-7.png" onclick="toggleStart()" style="width:36px; cursor:pointer; margin-left:5px;">
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/draggabilly@3/dist/draggabilly.pkgd.min.js"></script>
+    <script>
+        // --- BOOT SEQUENCE ---
+        setTimeout(() => {
+            document.getElementById('boot-screen').style.display = 'none';
+            document.getElementById('lock-screen').style.display = 'flex';
+        }, 4000);
+
+        function unlock() {
+            const pass = document.getElementById('pass-input').value;
+            if(pass !== "") { // Allows any password for now
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('desktop-environment').style.display = 'block';
+            } else { alert("Please enter a password"); }
+        }
+
+        function restartSystem() {
+            document.getElementById('desktop-environment').style.display = 'none';
+            document.getElementById('boot-screen').style.display = 'flex';
+            document.getElementById('boot-text').innerText = "Restarting...";
+            setTimeout(() => location.reload(), 2000);
+        }
+
+        // --- APPS & LOGIC ---
+        function setBG(color) { document.documentElement.style.setProperty('--bg-color', color); }
+        
+        function openApp(id) {
+            const win = document.getElementById(id);
+            win.style.display = 'block';
+            new Draggabilly(win, { handle: '.title-bar' });
+            document.getElementById('startMenu').style.display = 'none';
+        }
+
+        function closeApp(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function toggleStart() {
+            const m = document.getElementById('startMenu');
+            m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function calc(val) { document.getElementById('calc-display').value = val; }
+    </script>
+</body>
+</html>
+
